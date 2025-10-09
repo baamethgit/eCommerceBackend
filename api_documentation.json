@@ -502,6 +502,302 @@
           }
         }
       }
+    },
+    "/cart/": {
+      "get": {
+        "summary": "Récupérer le panier",
+        "tags": ["Cart"],
+        "security": [{"BearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "Panier de l'utilisateur",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Cart"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cart/add/": {
+      "post": {
+        "summary": "Ajouter un produit au panier",
+        "tags": ["Cart"],
+        "security": [{"BearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["product_id"],
+                "properties": {
+                  "product_id": {
+                    "type": "integer"
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "default": 1,
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Produit ajouté au panier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Cart"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erreur (stock insuffisant, produit inexistant)"
+          }
+        }
+      }
+    },
+    "/cart/update/{item_id}/": {
+      "patch": {
+        "summary": "Modifier la quantité d'un item",
+        "tags": ["Cart"],
+        "security": [{"BearerAuth": []}],
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["quantity"],
+                "properties": {
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Quantité mise à jour"
+          },
+          "400": {
+            "description": "Stock insuffisant"
+          },
+          "404": {
+            "description": "Item non trouvé"
+          }
+        }
+      }
+    },
+    "/cart/remove/{item_id}/": {
+      "delete": {
+        "summary": "Retirer un produit du panier",
+        "tags": ["Cart"],
+        "security": [{"BearerAuth": []}],
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Produit retiré du panier"
+          },
+          "404": {
+            "description": "Item non trouvé"
+          }
+        }
+      }
+    },
+    "/cart/clear/": {
+      "delete": {
+        "summary": "Vider le panier",
+        "tags": ["Cart"],
+        "security": [{"BearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "Panier vidé"
+          }
+        }
+      }
+    },
+    "/orders/create/": {
+      "post": {
+        "summary": "Créer une commande depuis le panier",
+        "tags": ["Orders"],
+        "security": [{"BearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["shipping_address", "shipping_city", "shipping_postal_code", "shipping_phone"],
+                "properties": {
+                  "shipping_address": {
+                    "type": "string",
+                    "maxLength": 255
+                  },
+                  "shipping_city": {
+                    "type": "string",
+                    "maxLength": 100
+                  },
+                  "shipping_postal_code": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "shipping_phone": {
+                    "type": "string",
+                    "maxLength": 20
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Commande créée avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/OrderDetail"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erreur (panier vide, stock insuffisant)"
+          }
+        }
+      }
+    },
+    "/orders/": {
+      "get": {
+        "summary": "Liste des commandes de l'utilisateur",
+        "tags": ["Orders"],
+        "security": [{"BearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "Liste des commandes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/OrderList"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{order_id}/": {
+      "get": {
+        "summary": "Détail d'une commande",
+        "tags": ["Orders"],
+        "security": [{"BearerAuth": []}],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Détail de la commande",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/OrderDetail"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Commande non trouvée"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -687,6 +983,161 @@
             "description": "Access token (validité: 60 minutes)"
           }
         }
+      },
+      "Cart": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "user": {
+            "type": "integer"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CartItem"
+            }
+          },
+          "total": {
+            "type": "string",
+            "description": "Prix total du panier"
+          },
+          "items_count": {
+            "type": "integer",
+            "description": "Nombre total d'articles"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CartItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "product": {
+            "type": "integer"
+          },
+          "product_name": {
+            "type": "string"
+          },
+          "product_image": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "price_unit": {
+            "type": "string",
+            "description": "Prix unitaire au moment de l'ajout"
+          },
+          "subtotal": {
+            "type": "string",
+            "description": "Sous-total (quantity × price_unit)"
+          }
+        }
+      },
+      "OrderList": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "paid", "shipped", "delivered", "cancelled"]
+          },
+          "total": {
+            "type": "string"
+          },
+          "items_count": {
+            "type": "integer"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OrderDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "user": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "paid", "shipped", "delivered", "cancelled"]
+          },
+          "total": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItem"
+            }
+          },
+          "items_count": {
+            "type": "integer"
+          },
+          "shipping_address": {
+            "type": "string"
+          },
+          "shipping_city": {
+            "type": "string"
+          },
+          "shipping_postal_code": {
+            "type": "string"
+          },
+          "shipping_phone": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OrderItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "product": {
+            "type": "integer"
+          },
+          "product_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "price_unit": {
+            "type": "string"
+          },
+          "subtotal": {
+            "type": "string"
+          }
+        }
       }
     },
     "securitySchemes": {
@@ -710,6 +1161,14 @@
     {
       "name": "Authentication",
       "description": "Authentification et gestion du profil utilisateur"
+    },
+    {
+      "name": "Cart",
+      "description": "Gestion du panier d'achat"
+    },
+    {
+      "name": "Orders",
+      "description": "Gestion des commandes"
     }
   ]
 }
